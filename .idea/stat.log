@@ -56,3 +56,9 @@
 {"ts":1730922973268,"action":"FILE_OPENED","file":"/.gitignore","tags":{"FILE_LINE_OF_CODE":"38"}}
 {"ts":1730922974199,"action":"FILE_CLOSED","file":"/.gitignore","tags":{"FILE_LINE_OF_CODE":"38"}}
 {"ts":1730922989562,"action":"FILE_OPENED","file":"/pom.xml","tags":{"FILE_LINE_OF_CODE":"72"}}
+{"ts":1730923108535,"action":"IDE_DEACTIVATED"}
+{"ts":1730923108580,"action":"IDE_ACTIVATED"}
+{"ts":1730923263260,"action":"IDE_DEACTIVATED"}
+{"ts":1730923266308,"action":"IDE_ACTIVATED"}
+{"ts":1730923268977,"action":"IDE_DEACTIVATED"}
+{"ts":1730923638533,"action":"IDE_ACTIVATED"}
