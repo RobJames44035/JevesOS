@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.jeves</groupId>
+  <artifactId>bootloader</artifactId>
+  <version>1.0</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>exec-maven-plugin</artifactId>
+      <version>3.5.0</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>1</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>/usr/bin/nasm</executable>
+              <arguments>
+                <argument>-f</argument>
+                <argument>bin</argument>
+                <argument>src/main/asm/bootloader.asm</argument>
+                <argument>-o</argument>
+                <argument>target/bootloader.bin</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>2</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>/usr/bin/mkisofs</executable>
+              <arguments>
+                <argument>-o</argument>
+                <argument>target/bootloader.iso</argument>
+                <argument>-b</argument>
+                <argument>bootloader.bin</argument>
+                <argument>-c</argument>
+                <argument>boot.cat</argument>
+                <argument>-no-emul-boot</argument>
+                <argument>-boot-load-size</argument>
+                <argument>4</argument> <!-- Adjust as needed -->
+                <argument>-boot-info-table</argument>
+                <argument>target</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
