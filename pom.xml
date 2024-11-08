@@ -1,23 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://www.maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jeves</groupId>
-    <artifactId>jevesos-bootloader</artifactId>
-    <version>1.0</version>
+    <groupId>org.starship</groupId>
+    <artifactId>starship-bootloader</artifactId>
+    <version>0.1</version>
 
     <properties>
         <NASM>/usr/bin/nasm</NASM>
+        <ASM>src/main/asm/</ASM>
+        <BOOT_TARGET>${project.build.directory}/boot/</BOOT_TARGET>
+        <MKDIR>/bin/mkdir</MKDIR>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>3.5.0</version>
+            <version>3.0.0</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -27,7 +29,23 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
-                    <!-- Step 1: Compile bootloader.asm into bootloader.bin -->
+                    <!-- Step 3: Create the boot directory if it doesn't exist -->
+                    <execution>
+                        <id>create-boot-dir</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${MKDIR}</executable>
+                            <arguments>
+                                <argument>-p</argument>
+                                <argument>${BOOT_TARGET}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- Step 1: Compile starship.asm into bootloader.bin -->
                     <execution>
                         <id>compile-bootloader</id>
                         <phase>compile</phase>
@@ -35,17 +53,18 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>/usr/bin/nasm</executable>
+                            <executable>${NASM}</executable>
                             <arguments>
                                 <argument>-f</argument>
                                 <argument>bin</argument>
-                                <argument>src/main/asm/bootloader.asm</argument>
+                                <argument>${ASM}starship.asm</argument>
                                 <argument>-o</argument>
-                                <argument>target/bootloader.bin</argument>
+                                <argument>${BOOT_TARGET}starship.bin</argument>
                             </arguments>
                         </configuration>
                     </execution>
-                    <!-- Step 2: Compile second_stage_loader.asm into second_stage_loader.bin -->
+
+                    <!-- Step 2: Compile stage_two.asm into second_stage_loader.bin -->
                     <execution>
                         <id>compile-second-stage-loader</id>
                         <phase>compile</phase>
@@ -53,71 +72,36 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>/usr/bin/nasm</executable>
+                            <executable>${NASM}</executable>
                             <arguments>
                                 <argument>-f</argument>
                                 <argument>bin</argument>
-                                <argument>src/main/asm/second_stage_loader.asm</argument>
+                                <argument>${ASM}stage_two.asm</argument>
                                 <argument>-o</argument>
-                                <argument>target/second_stage_loader.bin</argument>
+                                <argument>${BOOT_TARGET}stage_two.bin</argument>
                             </arguments>
                         </configuration>
                     </execution>
-                    <!-- Step 3: Create the boot directory if it doesn't exist -->
+
+                    <!-- Step 4: Create the ISO image -->
                     <execution>
-                        <id>create-boot-dir</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>/bin/mkdir</executable>
-                            <arguments>
-                                <argument>-p</argument>
-                                <argument>target/boot</argument>
-                            </arguments>
-                            <workingDirectory>${project.build.directory}</workingDirectory>
-                        </configuration>
-                    </execution>
-                    <!-- Step 4: Copy binaries to target/boot directory for ISO creation -->
-                    <execution>
-                        <id>copy-bin-files</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>/bin/cp</executable>
-                            <arguments>
-                                <argument>bootloader.bin</argument>
-                                <argument>second_stage_loader.bin</argument>
-                                <argument>boot/</argument>
-                            </arguments>
-                            <workingDirectory>${project.build.directory}</workingDirectory>
-                        </configuration>
-                    </execution>
-                    <!-- Step 5: Create the bootable ISO using bootloader.bin and second_stage_loader.bin -->
-                    <execution>
-                        <id>create-bootable-iso</id>
+                        <id>create-iso-image</id>
                         <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>/usr/bin/mkisofs</executable>
+                            <executable>genisoimage</executable>
                             <arguments>
-                                <argument>-v</argument> <!-- Add verbose output -->
                                 <argument>-o</argument>
-                                <argument>bootloader.iso</argument>
+                                <argument>${project.basedir}/target/StarshipOS.iso</argument>
                                 <argument>-b</argument>
-                                <argument>boot/bootloader.bin</argument>
-                                <argument>-c</argument>
-                                <argument>boot.cat</argument>
+                                <argument>boot/starship.bin</argument>
                                 <argument>-no-emul-boot</argument>
                                 <argument>-boot-load-size</argument>
-                                <argument>4</argument> <!-- Adjust as needed -->
+                                <argument>4</argument>
                                 <argument>-boot-info-table</argument>
-                                <argument>boot</argument>
+                                <argument>${project.build.directory}</argument>
                             </arguments>
                             <workingDirectory>${project.build.directory}</workingDirectory>
                         </configuration>
