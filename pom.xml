@@ -29,13 +29,10 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
-                    <!-- Step 3: Create the boot directory if it doesn't exist -->
                     <execution>
                         <id>create-boot-dir</id>
                         <phase>process-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
+                        <goals><goal>exec</goal></goals>
                         <configuration>
                             <executable>${MKDIR}</executable>
                             <arguments>
@@ -45,13 +42,10 @@
                         </configuration>
                     </execution>
 
-                    <!-- Step 1: Compile starship.asm into bootloader.bin -->
                     <execution>
                         <id>compile-bootloader</id>
                         <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
+                        <goals><goal>exec</goal></goals>
                         <configuration>
                             <executable>${NASM}</executable>
                             <arguments>
@@ -64,32 +58,10 @@
                         </configuration>
                     </execution>
 
-                    <!-- Step 2: Compile stage_two.asm into second_stage_loader.bin -->
-                    <execution>
-                        <id>compile-second-stage-loader</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>${NASM}</executable>
-                            <arguments>
-                                <argument>-f</argument>
-                                <argument>bin</argument>
-                                <argument>${ASM}stage_two.asm</argument>
-                                <argument>-o</argument>
-                                <argument>${BOOT_TARGET}stage_two.bin</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-
-                    <!-- Step 4: Create the ISO image -->
                     <execution>
                         <id>create-iso-image</id>
                         <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
+                        <goals><goal>exec</goal></goals>
                         <configuration>
                             <executable>genisoimage</executable>
                             <arguments>
@@ -101,7 +73,7 @@
                                 <argument>-boot-load-size</argument>
                                 <argument>4</argument>
                                 <argument>-boot-info-table</argument>
-                                <argument>${project.build.directory}</argument>
+                                <argument>.</argument>
                             </arguments>
                             <workingDirectory>${project.build.directory}</workingDirectory>
                         </configuration>
